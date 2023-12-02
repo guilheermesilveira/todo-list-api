@@ -8,8 +8,8 @@ public class AssignmentList : Entity
 {
     public int UserId { get; set; }
     public string Name { get; set; } = null!;
-    public User User { get; set; } = null!;
-    public Collection<Assignment> Assignments { get; set; } = new();
+    public virtual User User { get; set; } = null!;
+    public virtual Collection<Assignment> Assignments { get; set; } = new();
     
     public override bool Validate(out ValidationResult validationResult)
     {

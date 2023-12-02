@@ -9,12 +9,12 @@ public class AssignmentValidator : AbstractValidator<Assignment>
     {
         RuleFor(x => x.Description)
             .NotEmpty()
-            .WithMessage("A descrição não pode ser vazia.")
-            .Length(3, 200)
-            .WithMessage("A descrição deve conter entre {MinLength} e {MaxLength} caracteres.");
+            .WithMessage("A descrição da tarefa não pode ser vazia.")
+            .Length(1, 200)
+            .WithMessage("A descrição da tarefa deve conter entre {MinLength} e {MaxLength} caracteres.");
 
         RuleFor(x => x.Deadline)
             .GreaterThan(DateTime.Now)
-            .WithMessage("O prazo final deve possuir uma data maior que a atual.");
+            .WithMessage("O prazo final da tarefa deve possuir uma data maior que a atual.");
     }
 }

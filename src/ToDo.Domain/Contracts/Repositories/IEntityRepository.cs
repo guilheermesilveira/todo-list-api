@@ -5,11 +5,7 @@ using ToDo.Domain.Models;
 namespace ToDo.Domain.Contracts.Repositories;
 
 public interface IEntityRepository<T> : IDisposable where T : Entity
-{
-    IUnitOfWork UnityOfWork { get; }
-
-    void Create(T entity);
-    void Update(T entity);
-    void Delete(T entity); 
+{ 
+    IUnitOfWork UnitOfWork { get; }
     Task<T?> FirstOrDefault(Expression<Func<T, bool>> expression);
 }
