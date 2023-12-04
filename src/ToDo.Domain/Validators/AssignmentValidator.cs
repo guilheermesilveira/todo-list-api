@@ -8,8 +8,6 @@ public class AssignmentValidator : AbstractValidator<Assignment>
     public AssignmentValidator()
     {
         RuleFor(x => x.Description)
-            .NotEmpty()
-            .WithMessage("A descrição da tarefa não pode ser vazia.")
             .Length(1, 200)
             .WithMessage("A descrição da tarefa deve conter entre {MinLength} e {MaxLength} caracteres.");
 

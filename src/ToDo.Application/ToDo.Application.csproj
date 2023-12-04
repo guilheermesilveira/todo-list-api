@@ -13,4 +13,8 @@
       <PackageReference Include="ScottBrady91.AspNetCore.Identity.Argon2PasswordHasher" Version="1.4.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\ToDo.Domain\ToDo.Domain.csproj" />
+    </ItemGroup>
+
 </Project>

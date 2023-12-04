@@ -1,7 +1,9 @@
+using ToDo.Application;
 using ToDo.Infra.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddApplication(builder.Configuration, builder);
 builder.Services.AddInfraData(builder.Configuration);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -16,6 +18,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("default");
 
 app.UseAuthorization();
 
