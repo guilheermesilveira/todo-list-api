@@ -24,9 +24,9 @@
 
 ### Tecnologias utilizadas
 
-- .NET 6: versão do framwework .NET para desenvolver a aplicação.
+- .NET 6: versão do .NET para desenvolver a aplicação.
   
-- Entity Framerwork Core: essa tecnologia é a base de acesso a banco de dados, permitindo interação com o MySQL de forma eficiente.
+- Entity Framework Core: essa tecnologia é a base de acesso a banco de dados, permitindo interação com o MySQL de forma eficiente.
   
 - MySQL: sistema de gerenciamento de banco de dados escolhido para o projeto.
   
