@@ -26,7 +26,7 @@ public class AssignmentMapping : IEntityTypeConfiguration<Assignment>
         
         builder
             .Property(x => x.Deadline)
-            .IsRequired(false)
+            .IsRequired()
             .HasColumnType("DATETIME");
 
         builder
