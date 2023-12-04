@@ -67,10 +67,10 @@ public class AssignmentRepository : EntityRepository<Assignment>, IAssignmentRep
             query = query.Where(x => x.Concluded == filter.Concluded.Value);
 
         if (filter.StartDeadline.HasValue)
-            query = query.Where(x => x.Deadline != null && x.Deadline.Value >= filter.StartDeadline.Value);
+            query = query.Where(x => x.Deadline >= filter.StartDeadline.Value);
 
         if (filter.EndDeadline.HasValue) 
-            query = query.Where(x => x.Deadline != null && x.Deadline.Value <= filter.EndDeadline.Value);
+            query = query.Where(x => x.Deadline <= filter.EndDeadline.Value);
 
         if (assignmentListId.HasValue)
         {

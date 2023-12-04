@@ -8,7 +8,7 @@ public class Assignment : Entity
     public int UserId { get; set; }
     public int AssignmentListId { get; set; }
     public string Description { get; set; } = null!;
-    public DateTime? Deadline { get; set; }
+    public DateTime Deadline { get; set; }
     public bool Concluded { get; private set; }
     public DateTime? ConcludedAt { get; private set; }
     public User User { get; set; } = null!;

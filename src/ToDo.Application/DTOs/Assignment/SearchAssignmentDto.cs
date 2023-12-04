@@ -2,7 +2,7 @@
 
 public class SearchAssignmentDto
 {
-    public int AssignmentListId { get; set; }
+    public int? AssignmentListId { get; set; }
     public string Description { get; set; } = null!;
     public DateTime? StartDeadline { get; set; }
     public DateTime? EndDeadline { get; set; }

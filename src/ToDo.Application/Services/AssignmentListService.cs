@@ -125,12 +125,6 @@ public class AssignmentListService : BaseService, IAssignmentListService
 
     public async Task<PagedDto<AssignmentDto>?> SearchAssignments(int id, SearchAssignmentDto dto)
     {
-        if (id != dto.AssignmentListId)
-        {
-            Notificator.Handle("Os IDs não conferem.");
-            return null;
-        }
-        
         var httpAccessor = _httpContextAccessor.GetUserId();
         var filter = Mapper.Map<AssignmentFilter>(dto);
 

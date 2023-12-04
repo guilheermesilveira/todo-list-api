@@ -1,3 +1,4 @@
+using ToDo.API.Configuration;
 using ToDo.Application;
 using ToDo.Infra.Data;
 
@@ -5,9 +6,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplication(builder.Configuration, builder);
 builder.Services.AddInfraData(builder.Configuration);
+builder.Services.AddSwagger();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -21,6 +22,7 @@ app.UseHttpsRedirection();
 
 app.UseCors("default");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
