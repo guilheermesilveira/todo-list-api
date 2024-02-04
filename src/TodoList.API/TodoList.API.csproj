@@ -18,10 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Controllers\" />
-    </ItemGroup>
-
-    <ItemGroup>
+      <ProjectReference Include="..\TodoList.Application\TodoList.Application.csproj" />
       <ProjectReference Include="..\TodoList.Infra.Data\TodoList.Infra.Data.csproj" />
     </ItemGroup>
 
