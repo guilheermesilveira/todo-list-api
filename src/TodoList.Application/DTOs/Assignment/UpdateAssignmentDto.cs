@@ -6,7 +6,7 @@ namespace TodoList.Application.DTOs.Assignment;
 public class UpdateAssignmentDto
 {
     public string? Description { get; set; }
-    public DateTime? Deadline { get; set; }
+    public DateTime Deadline { get; set; }
     public int AssignmentListId { get; set; }
 
     public bool Validate(out ValidationResult validationResult)
@@ -21,13 +21,10 @@ public class UpdateAssignmentDto
                 .WithMessage("A descrição da tarefa deve conter entre {MinLength} e {MaxLength} caracteres.");
         }
 
-        if (Deadline.HasValue)
-        {
-            validator
-                .RuleFor(x => x.Deadline)
-                .GreaterThan(DateTime.Now)
-                .WithMessage("O prazo final da tarefa deve possuir uma data maior que a atual.");
-        }
+        validator
+            .RuleFor(x => x.Deadline)
+            .GreaterThan(DateTime.Now)
+            .WithMessage("O prazo final da tarefa deve possuir uma data maior que a atual.");
 
         validationResult = validator.Validate(this);
         return validationResult.IsValid;

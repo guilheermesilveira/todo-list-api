@@ -23,7 +23,7 @@ public class AssignmentListController : MainController
 
     [HttpPost]
     [SwaggerOperation("Create a to-do list")]
-    [ProducesResponseType(typeof(AssignmentListDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(AssignmentListDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BadRequestResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] CreateAssignmentListDto dto)
     {
@@ -34,11 +34,11 @@ public class AssignmentListController : MainController
     [HttpPut("{id}")]
     [SwaggerOperation("Update a to-do list")]
     [ProducesResponseType(typeof(AssignmentListDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(BadRequestResult), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(BadRequestResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(NotFoundResult), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Update(int id, [FromBody] UpdateAssignmentListDto inputModel)
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateAssignmentListDto dto)
     {
-        var updateAssignmentList = await _assignmentListService.Update(id, inputModel);
+        var updateAssignmentList = await _assignmentListService.Update(id, dto);
         return CustomResponse(updateAssignmentList);
     }
 
@@ -73,6 +73,7 @@ public class AssignmentListController : MainController
     [HttpGet("SearchTasks/{id}")]
     [SwaggerOperation("Search for tasks in a to-do list")]
     [ProducesResponseType(typeof(IEnumerable<AssignmentDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BadRequestResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(NotFoundResult), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> SearchAssignments(int id, [FromQuery] SearchAssignmentDto dto)
     {

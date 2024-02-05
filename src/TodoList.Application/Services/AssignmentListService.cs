@@ -38,9 +38,12 @@ public class AssignmentListService : IAssignmentListService
             return null;
         }
 
-        var getAssignmentList = await _assignmentListRepository.FirstOrDefault(x => x.Name == dto.Name);
-        if (getAssignmentList != null)
+        var existingAssignmentList = await _assignmentListRepository.FirstOrDefault(x => x.Name == dto.Name);
+        if (existingAssignmentList != null)
+        {
             _notificator.Handle("Já existe uma lista de tarefas com esse nome.");
+            return null;
+        }
 
         var createAssignmentList = _mapper.Map<AssignmentList>(dto);
         createAssignmentList.UserId = _httpContextAccessor.GetUserId() ?? 0;
@@ -51,27 +54,30 @@ public class AssignmentListService : IAssignmentListService
 
     public async Task<AssignmentListDto?> Update(int id, UpdateAssignmentListDto dto)
     {
-        var getAssignmentListById = await _assignmentListRepository.GetById(id, _httpContextAccessor.GetUserId());
-        if (getAssignmentListById == null)
-        {
-            _notificator.HandleNotFoundResource();
-            return null;
-        }
-
         if (!dto.Validate(out var validationResult))
         {
             _notificator.Handle(validationResult.Errors);
             return null;
         }
 
-        var getAssignmentListByName = await _assignmentListRepository.FirstOrDefault(x => x.Name == dto.Name);
-        if (getAssignmentListByName != null)
+        var existingAssignmentList = await _assignmentListRepository.GetById(id, _httpContextAccessor.GetUserId());
+        if (existingAssignmentList == null)
+        {
+            _notificator.HandleNotFoundResource();
+            return null;
+        }
+
+        var existingAssignmentListByName = await _assignmentListRepository.FirstOrDefault(x => x.Name == dto.Name);
+        if (existingAssignmentListByName != null)
+        {
             _notificator.Handle("Já existe uma lista de tarefas com esse nome.");
+            return null;
+        }
 
-        var updateAssignmentList = _mapper.Map<AssignmentList>(dto);
+        _mapper.Map(dto, existingAssignmentList);
 
-        _assignmentListRepository.Update(updateAssignmentList);
-        return await CommitChanges() ? _mapper.Map<AssignmentListDto>(updateAssignmentList) : null;
+        _assignmentListRepository.Update(existingAssignmentList);
+        return await CommitChanges() ? _mapper.Map<AssignmentListDto>(existingAssignmentList) : null;
     }
 
     public async Task Delete(int id)

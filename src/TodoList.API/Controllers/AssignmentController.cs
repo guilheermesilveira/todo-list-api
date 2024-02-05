@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using TodoList.API.Responses;
 using TodoList.Application.Contracts.Services;
 using TodoList.Application.DTOs.Assignment;
 using TodoList.Application.DTOs.Paged;
@@ -20,8 +21,8 @@ public class AssignmentController : MainController
 
     [HttpPost]
     [SwaggerOperation("Create a task")]
-    [ProducesResponseType(typeof(AssignmentDto), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(BadRequestResult), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(AssignmentDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BadRequestResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] CreateAssignmentDto dto)
     {
         var createAssignment = await _assignmentService.Create(dto);
@@ -31,7 +32,7 @@ public class AssignmentController : MainController
     [HttpPut("{id}")]
     [SwaggerOperation("Update a task")]
     [ProducesResponseType(typeof(AssignmentDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(BadRequestResult), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(BadRequestResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(NotFoundResult), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateAssignmentDto dto)
     {
