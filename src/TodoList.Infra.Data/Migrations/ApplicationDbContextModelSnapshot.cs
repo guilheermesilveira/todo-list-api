@@ -40,7 +40,7 @@ namespace TodoList.Infra.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("DATETIME");
 
-                    b.Property<DateTime>("Deadline")
+                    b.Property<DateTime?>("Deadline")
                         .HasColumnType("DATETIME");
 
                     b.Property<string>("Description")

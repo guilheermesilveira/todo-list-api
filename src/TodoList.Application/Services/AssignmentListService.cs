@@ -6,6 +6,7 @@ using TodoList.Application.DTOs.AssignmentList;
 using TodoList.Application.DTOs.Paged;
 using TodoList.Application.Extension;
 using TodoList.Application.Notifications;
+using TodoList.Application.Validations.AssignmentList;
 using TodoList.Domain.Contracts.Repositories;
 using TodoList.Domain.Filter;
 using TodoList.Domain.Models;
@@ -32,21 +33,11 @@ public class AssignmentListService : IAssignmentListService
 
     public async Task<AssignmentListDto?> Create(CreateAssignmentListDto dto)
     {
-        if (!dto.Validate(out var validationResult))
-        {
-            _notificator.Handle(validationResult.Errors);
-            return null;
-        }
-
-        var existingAssignmentList = await _assignmentListRepository.FirstOrDefault(x => x.Name == dto.Name);
-        if (existingAssignmentList != null)
-        {
-            _notificator.Handle("Já existe uma lista de tarefas com esse nome.");
-            return null;
-        }
-
         var createAssignmentList = _mapper.Map<AssignmentList>(dto);
         createAssignmentList.UserId = _httpContextAccessor.GetUserId() ?? 0;
+
+        if (!await ValidationsToCreateAndUpdateAssignmentList(createAssignmentList))
+            return null;
 
         _assignmentListRepository.Create(createAssignmentList);
         return await CommitChanges() ? _mapper.Map<AssignmentListDto>(createAssignmentList) : null;
@@ -54,48 +45,38 @@ public class AssignmentListService : IAssignmentListService
 
     public async Task<AssignmentListDto?> Update(int id, UpdateAssignmentListDto dto)
     {
-        if (!dto.Validate(out var validationResult))
-        {
-            _notificator.Handle(validationResult.Errors);
-            return null;
-        }
-
-        var existingAssignmentList = await _assignmentListRepository.GetById(id, _httpContextAccessor.GetUserId());
-        if (existingAssignmentList == null)
+        var updateAssignmentList = await _assignmentListRepository.GetById(id, _httpContextAccessor.GetUserId());
+        if (updateAssignmentList == null)
         {
             _notificator.HandleNotFoundResource();
             return null;
         }
 
-        var existingAssignmentListByName = await _assignmentListRepository.FirstOrDefault(x => x.Name == dto.Name);
-        if (existingAssignmentListByName != null)
-        {
-            _notificator.Handle("Já existe uma lista de tarefas com esse nome.");
+        _mapper.Map(dto, updateAssignmentList);
+
+        if (!await ValidationsToCreateAndUpdateAssignmentList(updateAssignmentList))
             return null;
-        }
 
-        _mapper.Map(dto, existingAssignmentList);
-
-        _assignmentListRepository.Update(existingAssignmentList);
-        return await CommitChanges() ? _mapper.Map<AssignmentListDto>(existingAssignmentList) : null;
+        _assignmentListRepository.Update(updateAssignmentList);
+        return await CommitChanges() ? _mapper.Map<AssignmentListDto>(updateAssignmentList) : null;
     }
 
     public async Task Delete(int id)
     {
-        var getAssignmentList = await _assignmentListRepository.GetById(id, _httpContextAccessor.GetUserId());
-        if (getAssignmentList == null)
+        var deleteAssignmentList = await _assignmentListRepository.GetById(id, _httpContextAccessor.GetUserId());
+        if (deleteAssignmentList == null)
         {
             _notificator.HandleNotFoundResource();
             return;
         }
 
-        if (getAssignmentList.Assignments.Any(x => !x.Concluded))
+        if (deleteAssignmentList.Assignments.Any(x => !x.Concluded))
         {
             _notificator.Handle("Não é possível deletar uma lista com tarefas não concluídas.");
             return;
         }
 
-        _assignmentListRepository.Delete(getAssignmentList);
+        _assignmentListRepository.Delete(deleteAssignmentList);
         await CommitChanges();
     }
 
@@ -152,6 +133,28 @@ public class AssignmentListService : IAssignmentListService
             PerPage = result.PerPage,
             PageCount = result.PageCount
         };
+    }
+
+    private async Task<bool> ValidationsToCreateAndUpdateAssignmentList(AssignmentList assignmentList)
+    {
+        var assignmentListValidator = new ValidatorToCreateAndUpdateAssignmentList();
+
+        var validationResult = await assignmentListValidator.ValidateAsync(assignmentList);
+        if (!validationResult.IsValid)
+        {
+            _notificator.Handle(validationResult.Errors);
+            return false;
+        }
+
+        var existingAssignmentListByName = await _assignmentListRepository.FirstOrDefault(x =>
+            x.Name == assignmentList.Name);
+        if (existingAssignmentListByName != null)
+        {
+            _notificator.Handle("Já existe uma lista de tarefas com esse nome.");
+            return false;
+        }
+
+        return true;
     }
 
     private async Task<bool> CommitChanges()

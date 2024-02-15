@@ -13,7 +13,8 @@ public class AutoMapperProfile : Profile
     {
         #region User
 
-        CreateMap<CreateUserDto, User>().ReverseMap();
+        CreateMap<RegisterUserDto, User>().ReverseMap();
+        CreateMap<UserLoginDto, User>().ReverseMap();
         CreateMap<UserDto, User>().ReverseMap();
 
         #endregion

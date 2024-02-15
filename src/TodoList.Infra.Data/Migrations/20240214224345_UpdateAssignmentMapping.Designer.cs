@@ -11,7 +11,7 @@ using TodoList.Infra.Data.Context;
 namespace TodoList.Infra.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240205120927_UpdateAssignmentMapping")]
+    [Migration("20240214224345_UpdateAssignmentMapping")]
     partial class UpdateAssignmentMapping
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -42,7 +42,7 @@ namespace TodoList.Infra.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("DATETIME");
 
-                    b.Property<DateTime>("Deadline")
+                    b.Property<DateTime?>("Deadline")
                         .HasColumnType("DATETIME");
 
                     b.Property<string>("Description")

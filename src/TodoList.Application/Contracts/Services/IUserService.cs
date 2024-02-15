@@ -4,6 +4,6 @@ namespace TodoList.Application.Contracts.Services;
 
 public interface IUserService
 {
-    Task<UserDto?> Create(CreateUserDto dto);
+    Task<UserDto?> Register(RegisterUserDto dto);
     Task<UserTokenDto?> Login(UserLoginDto dto);
 }

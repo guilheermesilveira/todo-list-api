@@ -3,7 +3,7 @@
 public class Assignment : Entity
 {
     public string Description { get; set; } = null!;
-    public DateTime Deadline { get; set; }
+    public DateTime? Deadline { get; set; }
     public bool Concluded { get; private set; }
     public DateTime? ConcludedAt { get; private set; }
     public int UserId { get; set; }

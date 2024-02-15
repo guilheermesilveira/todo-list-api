@@ -17,7 +17,7 @@ public class UserRepository : IUserRepository
 
     public IUnitOfWork UnitOfWork => _context;
 
-    public void Create(User user)
+    public void Register(User user)
     {
         _context.Users.Add(user);
     }

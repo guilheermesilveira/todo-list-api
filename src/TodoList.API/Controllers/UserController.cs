@@ -16,14 +16,14 @@ public class UserController : MainController
         _userService = userService;
     }
 
-    [HttpPost("Create")]
-    [SwaggerOperation(Summary = "Create a user", Tags = new[] { "User - Auth" })]
+    [HttpPost("Register")]
+    [SwaggerOperation(Summary = "Register a user", Tags = new[] { "User - Auth" })]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BadRequestResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Create([FromBody] CreateUserDto dto)
+    public async Task<IActionResult> Register([FromBody] RegisterUserDto dto)
     {
-        var createUser = await _userService.Create(dto);
-        return CustomResponse(createUser);
+        var registerUser = await _userService.Register(dto);
+        return CustomResponse(registerUser);
     }
 
     [HttpPost("Login")]

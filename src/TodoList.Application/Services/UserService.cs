@@ -9,6 +9,7 @@ using TodoList.Application.Configurations;
 using TodoList.Application.Contracts.Services;
 using TodoList.Application.DTOs.User;
 using TodoList.Application.Notifications;
+using TodoList.Application.Validations.User;
 using TodoList.Domain.Contracts.Repositories;
 using TodoList.Domain.Models;
 
@@ -32,40 +33,22 @@ public class UserService : IUserService
         _userRepository = userRepository;
     }
 
-    public async Task<UserDto?> Create(CreateUserDto dto)
+    public async Task<UserDto?> Register(RegisterUserDto dto)
     {
-        if (!dto.Validate(out var validationResult))
-        {
-            _notificator.Handle(validationResult.Errors);
+        if (!await ValidationsToRegisterUser(dto))
             return null;
-        }
 
-        var getUser = await _userRepository.GetByEmail(dto.Email);
-        if (getUser != null)
-        {
-            _notificator.Handle("Já existe um usuário cadastrado com o email informado.");
-            return null;
-        }
+        var registerUser = _mapper.Map<User>(dto);
+        registerUser.Password = _passwordHasher.HashPassword(registerUser, dto.Password);
 
-        var createUser = _mapper.Map<User>(dto);
-        createUser.Password = _passwordHasher.HashPassword(createUser, dto.Password);
-
-        _userRepository.Create(createUser);
-
-        if (await _userRepository.UnitOfWork.Commit())
-            return _mapper.Map<UserDto>(createUser);
-
-        _notificator.Handle("Não foi possível cadastrar o usuário.");
-        return null;
+        _userRepository.Register(registerUser);
+        return await CommitChanges() ? _mapper.Map<UserDto>(registerUser) : null;
     }
 
     public async Task<UserTokenDto?> Login(UserLoginDto dto)
     {
-        if (!dto.Validate(out var validationResult))
-        {
-            _notificator.Handle(validationResult.Errors);
+        if (!await ValidationsForLogin(dto))
             return null;
-        }
 
         var user = await _userRepository.GetByEmail(dto.Email);
         if (user == null)
@@ -80,6 +63,43 @@ public class UserService : IUserService
 
         _notificator.Handle("Email e/ou senha incorretos.");
         return null;
+    }
+
+    private async Task<bool> ValidationsToRegisterUser(RegisterUserDto dto)
+    {
+        var user = _mapper.Map<User>(dto);
+        var userValidator = new ValidatorToRegisterUser();
+
+        var validationResult = await userValidator.ValidateAsync(user);
+        if (!validationResult.IsValid)
+        {
+            _notificator.Handle(validationResult.Errors);
+            return false;
+        }
+
+        var existingUserByEmail = await _userRepository.GetByEmail(user.Email);
+        if (existingUserByEmail != null)
+        {
+            _notificator.Handle("Já existe um usuário cadastrado com o email informado.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private async Task<bool> ValidationsForLogin(UserLoginDto dto)
+    {
+        var user = _mapper.Map<User>(dto);
+        var userValidator = new LoginValidator();
+
+        var validationResult = await userValidator.ValidateAsync(user);
+        if (!validationResult.IsValid)
+        {
+            _notificator.Handle(validationResult.Errors);
+            return false;
+        }
+
+        return true;
     }
 
     private UserTokenDto GenerateToken(User user)
@@ -108,5 +128,14 @@ public class UserService : IUserService
         {
             Token = encodedToken
         };
+    }
+
+    private async Task<bool> CommitChanges()
+    {
+        if (await _userRepository.UnitOfWork.Commit())
+            return true;
+
+        _notificator.Handle("Ocorreu um erro ao salvar as alterações.");
+        return false;
     }
 }
