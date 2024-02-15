@@ -11,7 +11,7 @@ using TodoList.Infra.Data.Context;
 namespace TodoList.Infra.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240204191239_AddAllMappings")]
+    [Migration("20240215212829_AddAllMappings")]
     partial class AddAllMappings
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
