@@ -1,18 +1,18 @@
 ﻿using FluentValidation;
 
-namespace TodoList.Application.Validations.User;
+namespace TodoList.Application.Validations.Auth;
 
-public class ValidatorToRegisterUser : AbstractValidator<Domain.Models.User>
+public class RegistrationValidator : AbstractValidator<Domain.Models.User>
 {
-    public ValidatorToRegisterUser()
+    public RegistrationValidator()
     {
-        RuleFor(x => x.Name)
+        RuleFor(u => u.Name)
             .NotNull()
             .WithMessage("O nome não pode ser nulo.")
             .Length(3, 50)
             .WithMessage("O nome deve conter entre {MinLength} e {MaxLength} caracteres.");
 
-        RuleFor(x => x.Email)
+        RuleFor(u => u.Email)
             .NotNull()
             .WithMessage("O email não pode ser nulo.")
             .EmailAddress()
@@ -20,7 +20,7 @@ public class ValidatorToRegisterUser : AbstractValidator<Domain.Models.User>
             .MaximumLength(100)
             .WithMessage("O email deve conter no máximo {MaxLength} caracteres.");
 
-        RuleFor(x => x.Password)
+        RuleFor(u => u.Password)
             .NotNull()
             .WithMessage("A senha não pode ser nula.")
             .MinimumLength(5)

@@ -9,30 +9,30 @@ public class AssignmentListMapping : IEntityTypeConfiguration<AssignmentList>
     public void Configure(EntityTypeBuilder<AssignmentList> builder)
     {
         builder
-            .HasKey(x => x.Id);
+            .HasKey(assignmentList => assignmentList.Id);
 
         builder
-            .Property(x => x.Name)
+            .Property(assignmentList => assignmentList.Name)
             .IsRequired()
             .HasColumnType("VARCHAR(100)");
 
         builder
-            .Property(x => x.UserId)
+            .Property(assignmentList => assignmentList.UserId)
             .IsRequired();
 
         builder
-            .Property(x => x.CreatedAt)
+            .Property(assignmentList => assignmentList.CreatedAt)
             .ValueGeneratedOnAdd()
             .HasColumnType("DATETIME");
 
         builder
-            .Property(x => x.UpdatedAt)
+            .Property(assignmentList => assignmentList.UpdatedAt)
             .ValueGeneratedOnAddOrUpdate()
             .HasColumnType("DATETIME");
 
         builder
-            .HasMany(x => x.Assignments)
-            .WithOne(x => x.AssignmentList)
+            .HasMany(assignmentList => assignmentList.Assignments)
+            .WithOne(assignment => assignment.AssignmentList)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

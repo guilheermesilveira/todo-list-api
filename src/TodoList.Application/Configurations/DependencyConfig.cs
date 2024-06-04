@@ -18,7 +18,7 @@ public static class DependencyConfig
             .AddScoped<IPasswordHasher<User>, Argon2PasswordHasher<User>>();
 
         services
-            .AddScoped<IUserService, UserService>()
+            .AddScoped<IAuthService, AuthService>()
             .AddScoped<IAssignmentListService, AssignmentListService>()
             .AddScoped<IAssignmentService, AssignmentService>();
 

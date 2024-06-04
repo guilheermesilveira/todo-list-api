@@ -9,39 +9,39 @@ public class UserMapping : IEntityTypeConfiguration<User>
     public void Configure(EntityTypeBuilder<User> builder)
     {
         builder
-            .HasKey(x => x.Id);
+            .HasKey(u => u.Id);
 
         builder
-            .Property(x => x.Name)
+            .Property(u => u.Name)
             .IsRequired()
             .HasColumnType("VARCHAR(50)");
 
         builder
-            .Property(x => x.Email)
+            .Property(u => u.Email)
             .IsRequired()
             .HasColumnType("VARCHAR(100)");
 
         builder
-            .Property(x => x.Password)
+            .Property(u => u.Password)
             .IsRequired()
             .HasColumnType("VARCHAR(255)");
 
         builder
-            .Property(x => x.CreatedAt)
+            .Property(u => u.CreatedAt)
             .ValueGeneratedOnAdd()
             .HasColumnType("DATETIME");
 
         builder
-            .Property(x => x.UpdatedAt)
+            .Property(u => u.UpdatedAt)
             .ValueGeneratedOnAddOrUpdate()
             .HasColumnType("DATETIME");
 
         builder
-            .HasMany(x => x.AssignmentLists)
-            .WithOne(x => x.User);
+            .HasMany(u => u.AssignmentLists)
+            .WithOne(assignmentList => assignmentList.User);
 
         builder
-            .HasMany(x => x.Assignments)
-            .WithOne(x => x.User);
+            .HasMany(u => u.Assignments)
+            .WithOne(assignment => assignment.User);
     }
 }

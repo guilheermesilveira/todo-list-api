@@ -2,37 +2,38 @@
 using Swashbuckle.AspNetCore.Annotations;
 using TodoList.API.Responses;
 using TodoList.Application.Contracts.Services;
+using TodoList.Application.DTOs.Auth;
 using TodoList.Application.DTOs.User;
 using TodoList.Application.Notifications;
 
 namespace TodoList.API.Controllers;
 
-public class UserController : MainController
+public class AuthController : MainController
 {
-    private readonly IUserService _userService;
+    private readonly IAuthService _authService;
 
-    public UserController(INotificator notificator, IUserService userService) : base(notificator)
+    public AuthController(INotificator notificator, IAuthService authService) : base(notificator)
     {
-        _userService = userService;
+        _authService = authService;
     }
 
-    [HttpPost("Register")]
-    [SwaggerOperation(Summary = "Register a user", Tags = new[] { "User - Auth" })]
+    [HttpPost("Registro")]
+    [SwaggerOperation(Summary = "Registrar um novo usuário.", Tags = new[] { "Autenticação" })]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BadRequestResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Register([FromBody] RegisterUserDto dto)
     {
-        var registerUser = await _userService.Register(dto);
+        var registerUser = await _authService.Register(dto);
         return CustomResponse(registerUser);
     }
 
     [HttpPost("Login")]
-    [SwaggerOperation(Summary = "User login", Tags = new[] { "User - Auth" })]
-    [ProducesResponseType(typeof(UserTokenDto), StatusCodes.Status200OK)]
+    [SwaggerOperation(Summary = "Autenticar um usuário.", Tags = new[] { "Autenticação" })]
+    [ProducesResponseType(typeof(TokenDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BadRequestResponse), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Login([FromBody] UserLoginDto dto)
+    public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
-        var token = await _userService.Login(dto);
+        var token = await _authService.Login(dto);
         return CustomResponse(token);
     }
 }

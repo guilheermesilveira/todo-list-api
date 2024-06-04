@@ -46,25 +46,25 @@ public class AssignmentListRepository : IAssignmentListRepository
     {
         return await _context.AssignmentLists
             .AsNoTracking()
-            .Include(x => x.Assignments)
-            .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+            .Include(assignmentList => assignmentList.Assignments)
+            .FirstOrDefaultAsync(assignmentList => assignmentList.Id == id && assignmentList.UserId == userId);
     }
 
     public async Task<IPagedResult<AssignmentList>> Search(int? userId, string? name, int perPage = 10, int page = 1)
     {
         var query = _context.AssignmentLists
             .AsNoTracking()
-            .Where(x => x.UserId == userId)
+            .Where(assignmentList => assignmentList.UserId == userId)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(name))
-            query = query.Where(x => x.Name.Contains(name));
+            query = query.Where(assignmentList => assignmentList.Name.Contains(name));
 
         var result = new PagedResult<AssignmentList>
         {
             Items = await query
-                .OrderBy(x => x.Name)
-                .Include(x => x.Assignments)
+                .OrderBy(assignmentList => assignmentList.Name)
+                .Include(assignmentList => assignmentList.Assignments)
                 .Skip((page - 1) * perPage)
                 .Take(perPage)
                 .ToListAsync(),

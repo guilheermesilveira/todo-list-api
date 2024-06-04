@@ -13,7 +13,7 @@ public static class DependencyInjection
 
         services.AddAuthConfig(configuration);
 
-        services.Configure<ApiBehaviorOptions>(o => o.SuppressModelStateInvalidFilter = true);
+        services.Configure<ApiBehaviorOptions>(options => options.SuppressModelStateInvalidFilter = true);
 
         services.AddCorsConfig();
 

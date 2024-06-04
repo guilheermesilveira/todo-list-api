@@ -22,9 +22,10 @@ public class AssignmentListController : MainController
     }
 
     [HttpPost]
-    [SwaggerOperation("Create a to-do list")]
+    [SwaggerOperation(Summary = "Cria uma nova lista de tarefas.", Tags = new[] { "Lista de tarefas" })]
     [ProducesResponseType(typeof(AssignmentListDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BadRequestResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Create([FromBody] CreateAssignmentListDto dto)
     {
         var createAssignmentList = await _assignmentListService.Create(dto);
@@ -32,9 +33,10 @@ public class AssignmentListController : MainController
     }
 
     [HttpPut("{id}")]
-    [SwaggerOperation("Update a to-do list")]
+    [SwaggerOperation(Summary = "Atualiza uma lista de tarefas existente.", Tags = new[] { "Lista de tarefas" })]
     [ProducesResponseType(typeof(AssignmentListDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BadRequestResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(NotFoundResult), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateAssignmentListDto dto)
     {
@@ -43,8 +45,9 @@ public class AssignmentListController : MainController
     }
 
     [HttpDelete("{id}")]
-    [SwaggerOperation("Delete a to-do list")]
+    [SwaggerOperation(Summary = "Deleta uma lista de tarefas.", Tags = new[] { "Lista de tarefas" })]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(NotFoundResult), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
     {
@@ -53,8 +56,9 @@ public class AssignmentListController : MainController
     }
 
     [HttpGet("{id}")]
-    [SwaggerOperation("Get by id a to-do list")]
+    [SwaggerOperation(Summary = "Obtém uma lista de tarefas pelo id.", Tags = new[] { "Lista de tarefas" })]
     [ProducesResponseType(typeof(AssignmentListDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(NotFoundResult), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(int id)
     {
@@ -62,18 +66,20 @@ public class AssignmentListController : MainController
         return CustomResponse(getAssignmentList);
     }
 
-    [HttpGet("SearchLists")]
-    [SwaggerOperation("Search to-do lists")]
+    [HttpGet("Buscar")]
+    [SwaggerOperation(Summary = "Busca por listas de tarefas.", Tags = new[] { "Lista de tarefas" })]
     [ProducesResponseType(typeof(PagedDto<AssignmentListDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<PagedDto<AssignmentListDto>> Search([FromQuery] SearchAssignmentListDto dto)
     {
         return await _assignmentListService.Search(dto);
     }
 
-    [HttpGet("SearchTasks/{id}")]
-    [SwaggerOperation("Search for tasks in a to-do list")]
+    [HttpGet("Buscar-Tarefas/{id}")]
+    [SwaggerOperation(Summary = "Busca por tarefas em uma lista específica pelo id da lista.", Tags = new[] { "Lista de tarefas" })]
     [ProducesResponseType(typeof(IEnumerable<AssignmentDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BadRequestResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(NotFoundResult), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> SearchAssignments(int id, [FromQuery] SearchAssignmentDto dto)
     {

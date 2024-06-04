@@ -21,26 +21,26 @@ public static class SwaggerConfig
 
         services
             .AddEndpointsApiExplorer()
-            .AddSwaggerGen(c =>
+            .AddSwaggerGen(options =>
             {
-                c.EnableAnnotations();
-                c.SwaggerDoc("v1", new OpenApiInfo()
+                options.EnableAnnotations();
+                options.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
-                    Title = "To-do List API",
+                    Title = "Todo List API",
                     Contact = contact,
                     License = license
                 });
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
                     Type = SecuritySchemeType.ApiKey,
                     Scheme = "Bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
-                    Description = "JSON Web Token based security",
+                    Description = "Insira o token JWT desta maneira: Bearer {seu token}"
                 });
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
                     {
                         new OpenApiSecurityScheme
@@ -48,7 +48,7 @@ public static class SwaggerConfig
                             Reference = new OpenApiReference
                             {
                                 Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer",
+                                Id = "Bearer"
                             }
                         },
                         Array.Empty<string>()

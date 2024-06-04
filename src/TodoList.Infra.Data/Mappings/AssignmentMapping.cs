@@ -9,44 +9,44 @@ public class AssignmentMapping : IEntityTypeConfiguration<Assignment>
     public void Configure(EntityTypeBuilder<Assignment> builder)
     {
         builder
-            .HasKey(x => x.Id);
-        
+            .HasKey(assignment => assignment.Id);
+
         builder
-            .Property(x => x.Description)
+            .Property(assignment => assignment.Description)
             .IsRequired()
             .HasColumnType("VARCHAR(200)");
 
         builder
-            .Property(x => x.Deadline)
+            .Property(assignment => assignment.Deadline)
             .IsRequired(false)
             .HasColumnType("DATETIME");
 
         builder
-            .Property(x => x.Concluded)
+            .Property(assignment => assignment.Concluded)
             .IsRequired()
             .HasDefaultValue(false)
             .HasColumnType("TINYINT");
 
         builder
-            .Property(x => x.ConcludedAt)
+            .Property(assignment => assignment.ConcludedAt)
             .IsRequired(false)
             .HasColumnType("DATETIME");
 
         builder
-            .Property(x => x.UserId)
+            .Property(assignment => assignment.UserId)
             .IsRequired();
 
         builder
-            .Property(x => x.AssignmentListId)
+            .Property(assignment => assignment.AssignmentListId)
             .IsRequired();
 
         builder
-            .Property(x => x.CreatedAt)
+            .Property(assignment => assignment.CreatedAt)
             .ValueGeneratedOnAdd()
             .HasColumnType("DATETIME");
 
         builder
-            .Property(x => x.UpdatedAt)
+            .Property(assignment => assignment.UpdatedAt)
             .ValueGeneratedOnAddOrUpdate()
             .HasColumnType("DATETIME");
     }

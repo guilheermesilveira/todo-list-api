@@ -6,7 +6,7 @@ public class ValidatorToCreateAndUpdateAssignmentList : AbstractValidator<Domain
 {
     public ValidatorToCreateAndUpdateAssignmentList()
     {
-        RuleFor(x => x.Name)
+        RuleFor(assignmentList => assignmentList.Name)
             .NotNull()
             .WithMessage("O nome não pode ser nulo.")
             .Length(1, 100)

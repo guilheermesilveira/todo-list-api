@@ -20,9 +20,10 @@ public class AssignmentController : MainController
     }
 
     [HttpPost]
-    [SwaggerOperation("Create a task")]
+    [SwaggerOperation(Summary = "Cria uma nova tarefa.", Tags = new[] { "Tarefas" })]
     [ProducesResponseType(typeof(AssignmentDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BadRequestResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Create([FromBody] CreateAssignmentDto dto)
     {
         var createAssignment = await _assignmentService.Create(dto);
@@ -30,9 +31,10 @@ public class AssignmentController : MainController
     }
 
     [HttpPut("{id}")]
-    [SwaggerOperation("Update a task")]
+    [SwaggerOperation(Summary = "Atualiza uma tarefa existente.", Tags = new[] { "Tarefas" })]
     [ProducesResponseType(typeof(AssignmentDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BadRequestResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(NotFoundResult), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateAssignmentDto dto)
     {
@@ -40,9 +42,10 @@ public class AssignmentController : MainController
         return CustomResponse(updateAssignment);
     }
 
-    [HttpPatch("Conclude/{id}")]
-    [SwaggerOperation("Conclude a task")]
+    [HttpPatch("Concluir/{id}")]
+    [SwaggerOperation(Summary = "Marca uma tarefa como concluída.", Tags = new[] { "Tarefas" })]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(NotFoundResult), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> MarkConclude(int id)
     {
@@ -50,9 +53,10 @@ public class AssignmentController : MainController
         return CustomResponse();
     }
 
-    [HttpPatch("NotConclude/{id}")]
-    [SwaggerOperation("Not conclude a task")]
+    [HttpPatch("Pendente/{id}")]
+    [SwaggerOperation(Summary = "Marca uma tarefa como pendente.", Tags = new[] { "Tarefas" })]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(NotFoundResult), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> MarkNotConclude(int id)
     {
@@ -61,8 +65,9 @@ public class AssignmentController : MainController
     }
 
     [HttpDelete("{id}")]
-    [SwaggerOperation("Delete a task")]
+    [SwaggerOperation(Summary = "Deleta uma tarefa.", Tags = new[] { "Tarefas" })]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(NotFoundResult), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
     {
@@ -71,8 +76,9 @@ public class AssignmentController : MainController
     }
 
     [HttpGet("{id}")]
-    [SwaggerOperation("Get by id a task")]
+    [SwaggerOperation(Summary = "Obtém uma tarefa pelo id.", Tags = new[] { "Tarefas" })]
     [ProducesResponseType(typeof(AssignmentDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(NotFoundResult), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(int id)
     {
@@ -80,9 +86,10 @@ public class AssignmentController : MainController
         return CustomResponse(getAssignment);
     }
 
-    [HttpGet]
-    [SwaggerOperation("Search tasks")]
+    [HttpGet("Buscar")]
+    [SwaggerOperation(Summary = "Busca tarefas.", Tags = new[] { "Tarefas" })]
     [ProducesResponseType(typeof(PagedDto<AssignmentDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<PagedDto<AssignmentDto>> Search([FromQuery] SearchAssignmentDto dto)
     {
         return await _assignmentService.Search(dto);

@@ -7,28 +7,29 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using TodoList.Application.Configurations;
 using TodoList.Application.Contracts.Services;
+using TodoList.Application.DTOs.Auth;
 using TodoList.Application.DTOs.User;
 using TodoList.Application.Notifications;
-using TodoList.Application.Validations.User;
+using TodoList.Application.Validations.Auth;
 using TodoList.Domain.Contracts.Repositories;
 using TodoList.Domain.Models;
 
 namespace TodoList.Application.Services;
 
-public class UserService : IUserService
+public class AuthService : IAuthService
 {
-    private readonly AppSettings _appSettings;
     private readonly IMapper _mapper;
     private readonly INotificator _notificator;
+    private readonly JwtSettings _jwtSettings;
     private readonly IPasswordHasher<User> _passwordHasher;
     private readonly IUserRepository _userRepository;
 
-    public UserService(IOptions<AppSettings> appSettings, IMapper mapper, INotificator notificator,
+    public AuthService(IMapper mapper, INotificator notificator, IOptions<JwtSettings> jwtSettings,
         IPasswordHasher<User> passwordHasher, IUserRepository userRepository)
     {
-        _appSettings = appSettings.Value;
         _mapper = mapper;
         _notificator = notificator;
+        _jwtSettings = jwtSettings.Value;
         _passwordHasher = passwordHasher;
         _userRepository = userRepository;
     }
@@ -45,7 +46,7 @@ public class UserService : IUserService
         return await CommitChanges() ? _mapper.Map<UserDto>(registerUser) : null;
     }
 
-    public async Task<UserTokenDto?> Login(UserLoginDto dto)
+    public async Task<TokenDto?> Login(LoginDto dto)
     {
         if (!await ValidationsForLogin(dto))
             return null;
@@ -68,7 +69,7 @@ public class UserService : IUserService
     private async Task<bool> ValidationsToRegisterUser(RegisterUserDto dto)
     {
         var user = _mapper.Map<User>(dto);
-        var userValidator = new ValidatorToRegisterUser();
+        var userValidator = new RegistrationValidator();
 
         var validationResult = await userValidator.ValidateAsync(user);
         if (!validationResult.IsValid)
@@ -87,7 +88,7 @@ public class UserService : IUserService
         return true;
     }
 
-    private async Task<bool> ValidationsForLogin(UserLoginDto dto)
+    private async Task<bool> ValidationsForLogin(LoginDto dto)
     {
         var user = _mapper.Map<User>(dto);
         var userValidator = new LoginValidator();
@@ -102,29 +103,28 @@ public class UserService : IUserService
         return true;
     }
 
-    private UserTokenDto GenerateToken(User user)
+    private TokenDto GenerateToken(User user)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
+
+        var key = Encoding.ASCII.GetBytes(_jwtSettings.SecretKey);
 
         var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(new Claim[]
             {
                 new(ClaimTypes.Role, "User"),
+                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new(ClaimTypes.Name, user.Name),
-                new(ClaimTypes.NameIdentifier, user.Id.ToString())
+                new(ClaimTypes.Email, user.Email)
             }),
-            Issuer = _appSettings.Issuer,
-            Audience = _appSettings.Audience,
-            Expires = DateTime.UtcNow.AddHours(_appSettings.TokenExpiration),
-            SigningCredentials =
-                new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_appSettings.Secret)),
-                    SecurityAlgorithms.HmacSha256Signature)
+            Expires = DateTime.UtcNow.AddHours(_jwtSettings.HoursToExpire),
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         });
 
         var encodedToken = tokenHandler.WriteToken(token);
 
-        return new UserTokenDto
+        return new TokenDto
         {
             Token = encodedToken
         };

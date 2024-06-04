@@ -10,28 +10,25 @@ public static class AuthConfig
 {
     public static void AddAuthConfig(this IServiceCollection services, IConfiguration configuration)
     {
-        var appSettingsSection = configuration.GetSection("AppSettings");
-        services.Configure<AppSettings>(appSettingsSection);
+        var appSettingsSection = configuration.GetSection("JwtSettings");
+        services.Configure<JwtSettings>(appSettingsSection);
 
-        var appSettings = appSettingsSection.Get<AppSettings>();
-
+        var appSettings = appSettingsSection.Get<JwtSettings>();
         services
-            .AddAuthentication(x =>
+            .AddAuthentication(options =>
             {
-                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-            .AddJwtBearer(x =>
+            .AddJwtBearer(options =>
             {
-                x.TokenValidationParameters = new TokenValidationParameters
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = appSettings.Issuer,
-                    ValidAudience = appSettings.Audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(appSettings.Secret)),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(appSettings.SecretKey))
                 };
             });
     }

@@ -6,15 +6,15 @@ public class ValidatorToCreateAssignment : AbstractValidator<Domain.Models.Assig
 {
     public ValidatorToCreateAssignment()
     {
-        RuleFor(x => x.Description)
+        RuleFor(assignment => assignment.Description)
             .NotNull()
             .WithMessage("A descrição não pode ser nula.")
             .Length(1, 200)
             .WithMessage("A descrição deve conter entre {MinLength} e {MaxLength} caracteres.");
 
-        RuleFor(x => x.Deadline)
+        RuleFor(assignment => assignment.Deadline)
             .GreaterThan(DateTime.Now)
             .WithMessage("O prazo para conclusão deve possuir uma data maior que a atual.")
-            .When(x => x.Deadline.HasValue);
+            .When(assignment => assignment.Deadline.HasValue);
     }
 }

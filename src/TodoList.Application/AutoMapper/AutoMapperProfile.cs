@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using TodoList.Application.DTOs.Assignment;
 using TodoList.Application.DTOs.AssignmentList;
+using TodoList.Application.DTOs.Auth;
 using TodoList.Application.DTOs.User;
 using TodoList.Domain.Filter;
 using TodoList.Domain.Models;
@@ -11,10 +12,10 @@ public class AutoMapperProfile : Profile
 {
     public AutoMapperProfile()
     {
-        #region User
+        #region Auth
 
         CreateMap<RegisterUserDto, User>().ReverseMap();
-        CreateMap<UserLoginDto, User>().ReverseMap();
+        CreateMap<LoginDto, User>().ReverseMap();
         CreateMap<UserDto, User>().ReverseMap();
 
         #endregion

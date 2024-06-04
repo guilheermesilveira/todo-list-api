@@ -42,7 +42,7 @@ public class AssignmentRepository : IAssignmentRepository
 
     public async Task<Assignment?> GetById(int id, int? userId)
     {
-        return await _context.Assignments.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId);
+        return await _context.Assignments.AsNoTracking().FirstOrDefaultAsync(assignment => assignment.Id == id && assignment.UserId == userId);
     }
 
     public async Task<IPagedResult<Assignment>> Search(int? userId, int? assignmentListId, AssignmentFilter filter,
@@ -50,7 +50,7 @@ public class AssignmentRepository : IAssignmentRepository
     {
         var query = _context.Assignments
             .AsNoTracking()
-            .Where(x => x.UserId == userId)
+            .Where(assignment => assignment.UserId == userId)
             .AsQueryable();
 
         ApplyFilter(userId, assignmentListId, filter, ref query);
@@ -73,22 +73,22 @@ public class AssignmentRepository : IAssignmentRepository
         ref IQueryable<Assignment> query)
     {
         if (!string.IsNullOrWhiteSpace(filter.Description))
-            query = query.Where(x => x.Description.Contains(filter.Description));
+            query = query.Where(assignment => assignment.Description.Contains(filter.Description));
 
         if (filter.Concluded.HasValue)
-            query = query.Where(x => x.Concluded == filter.Concluded.Value);
+            query = query.Where(assignment => assignment.Concluded == filter.Concluded.Value);
 
         if (filter.StartDeadline.HasValue)
-            query = query.Where(x => x.Deadline >= filter.StartDeadline.Value);
+            query = query.Where(assignment => assignment.Deadline >= filter.StartDeadline.Value);
 
         if (filter.EndDeadline.HasValue)
-            query = query.Where(x => x.Deadline <= filter.EndDeadline.Value);
+            query = query.Where(assignment => assignment.Deadline <= filter.EndDeadline.Value);
 
         if (assignmentListId.HasValue)
         {
             query = query
-                .Where(x => x.AssignmentListId == assignmentListId)
-                .Where(x => x.AssignmentList.UserId == userId);
+                .Where(assignment => assignment.AssignmentListId == assignmentListId)
+                .Where(assignment => assignment.AssignmentList.UserId == userId);
         }
     }
 

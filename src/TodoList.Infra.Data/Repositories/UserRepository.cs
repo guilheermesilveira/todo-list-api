@@ -24,7 +24,7 @@ public class UserRepository : IUserRepository
 
     public async Task<User?> GetByEmail(string email)
     {
-        return await _context.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Email == email);
+        return await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email);
     }
 
     public void Dispose()
