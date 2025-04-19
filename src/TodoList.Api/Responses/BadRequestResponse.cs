@@ -1,4 +1,4 @@
-﻿namespace TodoList.API.Responses;
+﻿namespace TodoList.Api.Responses;
 
 public class BadRequestResponse
 {

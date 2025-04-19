@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using TodoList.API.Responses;
+using TodoList.Api.Responses;
 using TodoList.Application.Contracts.Services;
 using TodoList.Application.DTOs.Auth;
 using TodoList.Application.DTOs.User;
 using TodoList.Application.Notifications;
 
-namespace TodoList.API.Controllers;
+namespace TodoList.Api.Controllers;
 
 public class AuthController : MainController
 {

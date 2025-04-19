@@ -1,10 +1,10 @@
 ﻿using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using TodoList.API.Responses;
+using TodoList.Api.Responses;
 using TodoList.Application.Notifications;
 
-namespace TodoList.API.Controllers;
+namespace TodoList.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]

@@ -1,4 +1,4 @@
-using TodoList.API.Configuration;
+using TodoList.Api.Configuration;
 using TodoList.Application;
 using TodoList.Infra.Data;
 
