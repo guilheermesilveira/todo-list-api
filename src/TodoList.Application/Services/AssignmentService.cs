@@ -5,7 +5,7 @@ using TodoList.Application.DTOs.Assignment;
 using TodoList.Application.DTOs.Paged;
 using TodoList.Application.Extension;
 using TodoList.Application.Notifications;
-using TodoList.Application.Validations.Assignment;
+using TodoList.Application.Validations;
 using TodoList.Domain.Contracts.Repositories;
 using TodoList.Domain.Filter;
 using TodoList.Domain.Models;
@@ -32,76 +32,79 @@ public class AssignmentService : IAssignmentService
 
     public async Task<AssignmentDto?> Create(CreateAssignmentDto dto)
     {
-        if (!await ValidationsToCreateAssignment(dto))
+        if (!await ValidationsToCreate(dto))
             return null;
 
-        var createAssignment = _mapper.Map<Assignment>(dto);
-        createAssignment.UserId = _httpContextAccessor.GetUserId() ?? 0;
+        var assignment = _mapper.Map<Assignment>(dto);
+        assignment.UserId = _httpContextAccessor.GetUserId() ?? 0;
+        _assignmentRepository.Create(assignment);
 
-        _assignmentRepository.Create(createAssignment);
-        return await CommitChanges() ? _mapper.Map<AssignmentDto>(createAssignment) : null;
+        return await CommitChanges() ? _mapper.Map<AssignmentDto>(assignment) : null;
     }
 
     public async Task<AssignmentDto?> Update(int id, UpdateAssignmentDto dto)
     {
-        if (!await ValidationsToUpdateAssignment(id, dto))
+        if (!await ValidationsToUpdate(id, dto))
             return null;
 
-        var updateAssignment = await _assignmentRepository.GetById(id, _httpContextAccessor.GetUserId());
-        MappingToUpdateAssignment(updateAssignment!, dto);
+        var assignment = await _assignmentRepository.GetById(id, _httpContextAccessor.GetUserId());
+        assignment!.Description = dto.Description;
+        if (dto.Deadline.HasValue)
+            assignment.Deadline = dto.Deadline;
+        assignment.AssignmentListId = dto.AssignmentListId;
+        _assignmentRepository.Update(assignment);
 
-        _assignmentRepository.Update(updateAssignment!);
-        return await CommitChanges() ? _mapper.Map<AssignmentDto>(updateAssignment) : null;
+        return await CommitChanges() ? _mapper.Map<AssignmentDto>(assignment) : null;
     }
 
     public async Task MarkConclude(int id)
     {
-        var getAssignment = await _assignmentRepository.GetById(id, _httpContextAccessor.GetUserId());
-        if (getAssignment == null)
+        var assignment = await _assignmentRepository.GetById(id, _httpContextAccessor.GetUserId());
+        if (assignment == null)
         {
             _notificator.HandleNotFoundResource();
             return;
         }
 
-        getAssignment.SetConclude();
+        assignment.SetConclude();
+        _assignmentRepository.Update(assignment);
 
-        _assignmentRepository.Update(getAssignment);
         await CommitChanges();
     }
 
     public async Task MarkNotConclude(int id)
     {
-        var getAssignment = await _assignmentRepository.GetById(id, _httpContextAccessor.GetUserId());
-        if (getAssignment == null)
+        var assignment = await _assignmentRepository.GetById(id, _httpContextAccessor.GetUserId());
+        if (assignment == null)
         {
             _notificator.HandleNotFoundResource();
             return;
         }
 
-        getAssignment.SetNotConclude();
+        assignment.SetNotConclude();
+        _assignmentRepository.Update(assignment);
 
-        _assignmentRepository.Update(getAssignment);
         await CommitChanges();
     }
 
     public async Task Delete(int id)
     {
-        var deleteAssignment = await _assignmentRepository.GetById(id, _httpContextAccessor.GetUserId());
-        if (deleteAssignment == null)
+        var assignment = await _assignmentRepository.GetById(id, _httpContextAccessor.GetUserId());
+        if (assignment == null)
         {
             _notificator.HandleNotFoundResource();
             return;
         }
 
-        _assignmentRepository.Delete(deleteAssignment);
+        _assignmentRepository.Delete(assignment);
         await CommitChanges();
     }
 
     public async Task<AssignmentDto?> GetById(int id)
     {
-        var getAssignment = await _assignmentRepository.GetById(id, _httpContextAccessor.GetUserId());
-        if (getAssignment != null)
-            return _mapper.Map<AssignmentDto>(getAssignment);
+        var assignment = await _assignmentRepository.GetById(id, _httpContextAccessor.GetUserId());
+        if (assignment != null)
+            return _mapper.Map<AssignmentDto>(assignment);
 
         _notificator.HandleNotFoundResource();
         return null;
@@ -124,85 +127,61 @@ public class AssignmentService : IAssignmentService
         };
     }
 
-    private async Task<bool> ValidationsToCreateAssignment(CreateAssignmentDto dto)
+    private async Task<bool> ValidationsToCreate(CreateAssignmentDto dto)
     {
         var assignment = _mapper.Map<Assignment>(dto);
-        var assignmentValidator = new ValidatorToCreateAssignment();
+        var validator = new AssignmentValidator();
 
-        var validationResult = await assignmentValidator.ValidateAsync(assignment);
+        var validationResult = await validator.ValidateAsync(assignment);
         if (!validationResult.IsValid)
         {
             _notificator.Handle(validationResult.Errors);
             return false;
         }
 
-        var existingAssignmentList = await _assignmentListRepository.FirstOrDefault(x =>
-            x.Id == dto.AssignmentListId);
-        if (existingAssignmentList == null)
+        var assignmentList = await _assignmentListRepository.FirstOrDefault(list => list.Id == dto.AssignmentListId);
+        if (assignmentList == null)
         {
-            _notificator.Handle("Não existe uma lista de tarefas com o id informado.");
-            return false;
-        }
-
-        var existingAssignment = await _assignmentRepository.FirstOrDefault(x =>
-            x.Description == dto.Description && x.AssignmentListId == dto.AssignmentListId);
-        if (existingAssignment != null)
-        {
-            _notificator.Handle("Já existe uma tarefa cadastrada com essa descrição nessa lista.");
+            _notificator.Handle("There is no task list with the given id");
             return false;
         }
 
         return true;
     }
 
-    private async Task<bool> ValidationsToUpdateAssignment(int id, UpdateAssignmentDto dto)
+    private async Task<bool> ValidationsToUpdate(int id, UpdateAssignmentDto dto)
     {
-        var existingAssignment = await _assignmentRepository.GetById(id, _httpContextAccessor.GetUserId());
-        if (existingAssignment == null)
+        if (id != dto.Id)
+        {
+            _notificator.Handle("The ID given to the URL must be the same as the ID given in the JSON");
+            return false;
+        }
+
+        var assignmentExist = await _assignmentRepository.GetById(id, _httpContextAccessor.GetUserId());
+        if (assignmentExist == null)
         {
             _notificator.HandleNotFoundResource();
             return false;
         }
 
         var assignment = _mapper.Map<Assignment>(dto);
-        var assignmentValidator = new ValidatorToUpdateAssignment();
+        var validator = new AssignmentValidator();
 
-        var validationResult = await assignmentValidator.ValidateAsync(assignment);
+        var validationResult = await validator.ValidateAsync(assignment);
         if (!validationResult.IsValid)
         {
             _notificator.Handle(validationResult.Errors);
             return false;
         }
 
-        var existingAssignmentList = await _assignmentListRepository.FirstOrDefault(x =>
-            x.Id == dto.AssignmentListId);
-        if (existingAssignmentList == null)
+        var assignmentList = await _assignmentListRepository.FirstOrDefault(list => list.Id == dto.AssignmentListId);
+        if (assignmentList == null)
         {
-            _notificator.Handle("Não existe uma lista de tarefas com o id informado.");
+            _notificator.Handle("There is no task list with the given id");
             return false;
         }
 
-        if (!string.IsNullOrEmpty(dto.Description))
-        {
-            var existingAssignmentByDescription = await _assignmentRepository.FirstOrDefault(x =>
-                x.Description == dto.Description && x.AssignmentListId == dto.AssignmentListId);
-            if (existingAssignmentByDescription != null)
-            {
-                _notificator.Handle("Já existe uma tarefa cadastrada com essa descrição nessa lista.");
-                return false;
-            }
-        }
-
         return true;
-    }
-
-    private void MappingToUpdateAssignment(Assignment assignment, UpdateAssignmentDto dto)
-    {
-        if (!string.IsNullOrEmpty(dto.Description))
-            assignment.Description = dto.Description;
-
-        if (dto.Deadline.HasValue)
-            assignment.Deadline = dto.Deadline;
     }
 
     private async Task<bool> CommitChanges()
@@ -210,7 +189,7 @@ public class AssignmentService : IAssignmentService
         if (await _assignmentRepository.UnitOfWork.Commit())
             return true;
 
-        _notificator.Handle("Ocorreu um erro ao salvar as alterações.");
+        _notificator.Handle("An error occurred while saving changes");
         return false;
     }
 }

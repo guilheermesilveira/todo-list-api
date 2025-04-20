@@ -17,18 +17,18 @@ public class AuthController : MainController
         _authService = authService;
     }
 
-    [HttpPost("Registro")]
-    [SwaggerOperation(Summary = "Registrar um novo usuário.", Tags = new[] { "Autenticação" })]
+    [HttpPost("register")]
+    [SwaggerOperation(Summary = "Register a new user", Tags = new[] { "Authentication" })]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BadRequestResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Register([FromBody] RegisterUserDto dto)
     {
-        var registerUser = await _authService.Register(dto);
-        return CustomResponse(registerUser);
+        var user = await _authService.Register(dto);
+        return CustomResponse(user);
     }
 
-    [HttpPost("Login")]
-    [SwaggerOperation(Summary = "Autenticar um usuário.", Tags = new[] { "Autenticação" })]
+    [HttpPost("login")]
+    [SwaggerOperation(Summary = "Auth", Tags = new[] { "Authentication" })]
     [ProducesResponseType(typeof(TokenDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(BadRequestResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)

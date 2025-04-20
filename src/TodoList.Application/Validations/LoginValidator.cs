@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace TodoList.Application.Validations.Auth;
+namespace TodoList.Application.Validations;
 
 public class LoginValidator : AbstractValidator<Domain.Models.User>
 {
@@ -8,10 +8,10 @@ public class LoginValidator : AbstractValidator<Domain.Models.User>
     {
         RuleFor(u => u.Email)
             .NotEmpty()
-            .WithMessage("O email não pode ser vazio.");
+            .WithMessage("Email cannot be empty");
 
         RuleFor(u => u.Password)
             .NotEmpty()
-            .WithMessage("A senha não pode ser vazia.");
+            .WithMessage("Password cannot be empty");
     }
 }

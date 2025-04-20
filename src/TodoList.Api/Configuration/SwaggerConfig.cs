@@ -27,7 +27,7 @@ public static class SwaggerConfig
                 options.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
-                    Title = "Todo List API",
+                    Title = "To-do List API",
                     Contact = contact,
                     License = license
                 });
@@ -38,7 +38,7 @@ public static class SwaggerConfig
                     Scheme = "Bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
-                    Description = "Insira o token JWT desta maneira: Bearer {seu token}"
+                    Description = "Insert the JWT token like this: Bearer {your token}"
                 });
                 options.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {

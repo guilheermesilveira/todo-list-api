@@ -6,7 +6,7 @@ using TodoList.Application.DTOs.AssignmentList;
 using TodoList.Application.DTOs.Paged;
 using TodoList.Application.Extension;
 using TodoList.Application.Notifications;
-using TodoList.Application.Validations.AssignmentList;
+using TodoList.Application.Validations;
 using TodoList.Domain.Contracts.Repositories;
 using TodoList.Domain.Filter;
 using TodoList.Domain.Models;
@@ -33,58 +33,52 @@ public class AssignmentListService : IAssignmentListService
 
     public async Task<AssignmentListDto?> Create(CreateAssignmentListDto dto)
     {
-        var createAssignmentList = _mapper.Map<AssignmentList>(dto);
-        createAssignmentList.UserId = _httpContextAccessor.GetUserId() ?? 0;
-
-        if (!await ValidationsToCreateAndUpdateAssignmentList(createAssignmentList))
+        if (!await ValidationsToCreate(dto))
             return null;
 
-        _assignmentListRepository.Create(createAssignmentList);
-        return await CommitChanges() ? _mapper.Map<AssignmentListDto>(createAssignmentList) : null;
+        var assignmentList = _mapper.Map<AssignmentList>(dto);
+        assignmentList.UserId = _httpContextAccessor.GetUserId() ?? 0;
+        _assignmentListRepository.Create(assignmentList);
+
+        return await CommitChanges() ? _mapper.Map<AssignmentListDto>(assignmentList) : null;
     }
 
     public async Task<AssignmentListDto?> Update(int id, UpdateAssignmentListDto dto)
     {
-        var updateAssignmentList = await _assignmentListRepository.GetById(id, _httpContextAccessor.GetUserId());
-        if (updateAssignmentList == null)
-        {
-            _notificator.HandleNotFoundResource();
-            return null;
-        }
-
-        _mapper.Map(dto, updateAssignmentList);
-
-        if (!await ValidationsToCreateAndUpdateAssignmentList(updateAssignmentList))
+        if (!await ValidationsToUpdate(id, dto))
             return null;
 
-        _assignmentListRepository.Update(updateAssignmentList);
-        return await CommitChanges() ? _mapper.Map<AssignmentListDto>(updateAssignmentList) : null;
+        var assignmentList = await _assignmentListRepository.GetById(id, _httpContextAccessor.GetUserId());
+        assignmentList!.Name = dto.Name;
+        _assignmentListRepository.Update(assignmentList);
+
+        return await CommitChanges() ? _mapper.Map<AssignmentListDto>(assignmentList) : null;
     }
 
     public async Task Delete(int id)
     {
-        var deleteAssignmentList = await _assignmentListRepository.GetById(id, _httpContextAccessor.GetUserId());
-        if (deleteAssignmentList == null)
+        var assignmentList = await _assignmentListRepository.GetById(id, _httpContextAccessor.GetUserId());
+        if (assignmentList == null)
         {
             _notificator.HandleNotFoundResource();
             return;
         }
 
-        if (deleteAssignmentList.Assignments.Any(x => !x.Concluded))
+        if (assignmentList.Assignments.Any(assignment => !assignment.Concluded))
         {
-            _notificator.Handle("Não é possível deletar uma lista com tarefas não concluídas.");
+            _notificator.Handle("Unable to delete a list with pending tasks");
             return;
         }
 
-        _assignmentListRepository.Delete(deleteAssignmentList);
+        _assignmentListRepository.Delete(assignmentList);
         await CommitChanges();
     }
 
     public async Task<AssignmentListDto?> GetById(int id)
     {
-        var getAssignmentList = await _assignmentListRepository.GetById(id, _httpContextAccessor.GetUserId());
-        if (getAssignmentList != null)
-            return _mapper.Map<AssignmentListDto>(getAssignmentList);
+        var assignmentList = await _assignmentListRepository.GetById(id, _httpContextAccessor.GetUserId());
+        if (assignmentList != null)
+            return _mapper.Map<AssignmentListDto>(assignmentList);
 
         _notificator.HandleNotFoundResource();
         return null;
@@ -109,12 +103,12 @@ public class AssignmentListService : IAssignmentListService
     {
         if (id != dto.AssignmentListId)
         {
-            _notificator.Handle("Os dois IDs referente a lista de tarefas precisam ser iguais.");
+            _notificator.Handle("The two IDs for the task list must be the same");
             return null;
         }
 
-        var getAssignmentList = await _assignmentListRepository.GetById(id, _httpContextAccessor.GetUserId());
-        if (getAssignmentList == null)
+        var assignmentList = await _assignmentListRepository.GetById(id, _httpContextAccessor.GetUserId());
+        if (assignmentList == null)
         {
             _notificator.HandleNotFoundResource();
             return null;
@@ -135,22 +129,43 @@ public class AssignmentListService : IAssignmentListService
         };
     }
 
-    private async Task<bool> ValidationsToCreateAndUpdateAssignmentList(AssignmentList assignmentList)
+    private async Task<bool> ValidationsToCreate(CreateAssignmentListDto dto)
     {
-        var assignmentListValidator = new ValidatorToCreateAndUpdateAssignmentList();
+        var assignmentList = _mapper.Map<AssignmentList>(dto);
+        var validator = new AssignmentListValidator();
 
-        var validationResult = await assignmentListValidator.ValidateAsync(assignmentList);
+        var validationResult = await validator.ValidateAsync(assignmentList);
         if (!validationResult.IsValid)
         {
             _notificator.Handle(validationResult.Errors);
             return false;
         }
 
-        var existingAssignmentListByName = await _assignmentListRepository.FirstOrDefault(x =>
-            x.Name == assignmentList.Name);
-        if (existingAssignmentListByName != null)
+        return true;
+    }
+
+    private async Task<bool> ValidationsToUpdate(int id, UpdateAssignmentListDto dto)
+    {
+        if (id != dto.Id)
         {
-            _notificator.Handle("Já existe uma lista de tarefas com esse nome.");
+            _notificator.Handle("The ID given to the URL must be the same as the ID given in the JSON");
+            return false;
+        }
+
+        var assignmentListExist = await _assignmentListRepository.GetById(id, _httpContextAccessor.GetUserId());
+        if (assignmentListExist == null)
+        {
+            _notificator.HandleNotFoundResource();
+            return false;
+        }
+
+        var assignmentList = _mapper.Map<AssignmentList>(dto);
+        var validator = new AssignmentListValidator();
+
+        var validationResult = await validator.ValidateAsync(assignmentList);
+        if (!validationResult.IsValid)
+        {
+            _notificator.Handle(validationResult.Errors);
             return false;
         }
 
@@ -162,7 +177,7 @@ public class AssignmentListService : IAssignmentListService
         if (await _assignmentListRepository.UnitOfWork.Commit())
             return true;
 
-        _notificator.Handle("Ocorreu um erro ao salvar as alterações.");
+        _notificator.Handle("An error occurred while saving changes");
         return false;
     }
 }

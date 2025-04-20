@@ -10,7 +10,7 @@ using TodoList.Application.Contracts.Services;
 using TodoList.Application.DTOs.Auth;
 using TodoList.Application.DTOs.User;
 using TodoList.Application.Notifications;
-using TodoList.Application.Validations.Auth;
+using TodoList.Application.Validations;
 using TodoList.Domain.Contracts.Repositories;
 using TodoList.Domain.Models;
 
@@ -36,14 +36,14 @@ public class AuthService : IAuthService
 
     public async Task<UserDto?> Register(RegisterUserDto dto)
     {
-        if (!await ValidationsToRegisterUser(dto))
+        if (!await ValidationsToRegister(dto))
             return null;
 
-        var registerUser = _mapper.Map<User>(dto);
-        registerUser.Password = _passwordHasher.HashPassword(registerUser, dto.Password);
+        var user = _mapper.Map<User>(dto);
+        user.Password = _passwordHasher.HashPassword(user, dto.Password);
+        _userRepository.Register(user);
 
-        _userRepository.Register(registerUser);
-        return await CommitChanges() ? _mapper.Map<UserDto>(registerUser) : null;
+        return await CommitChanges() ? _mapper.Map<UserDto>(user) : null;
     }
 
     public async Task<TokenDto?> Login(LoginDto dto)
@@ -54,7 +54,7 @@ public class AuthService : IAuthService
         var user = await _userRepository.GetByEmail(dto.Email);
         if (user == null)
         {
-            _notificator.Handle("Email e/ou senha incorretos.");
+            _notificator.Handle("Incorrect email and/or password");
             return null;
         }
 
@@ -62,26 +62,26 @@ public class AuthService : IAuthService
         if (result == PasswordVerificationResult.Success)
             return GenerateToken(user);
 
-        _notificator.Handle("Email e/ou senha incorretos.");
+        _notificator.Handle("Incorrect email and/or password");
         return null;
     }
 
-    private async Task<bool> ValidationsToRegisterUser(RegisterUserDto dto)
+    private async Task<bool> ValidationsToRegister(RegisterUserDto dto)
     {
         var user = _mapper.Map<User>(dto);
-        var userValidator = new RegistrationValidator();
+        var validator = new RegistrationValidator();
 
-        var validationResult = await userValidator.ValidateAsync(user);
+        var validationResult = await validator.ValidateAsync(user);
         if (!validationResult.IsValid)
         {
             _notificator.Handle(validationResult.Errors);
             return false;
         }
 
-        var existingUserByEmail = await _userRepository.GetByEmail(user.Email);
-        if (existingUserByEmail != null)
+        var userExist = await _userRepository.GetByEmail(user.Email);
+        if (userExist != null)
         {
-            _notificator.Handle("Já existe um usuário cadastrado com o email informado.");
+            _notificator.Handle("There is already a registered user with the email provided");
             return false;
         }
 
@@ -91,9 +91,9 @@ public class AuthService : IAuthService
     private async Task<bool> ValidationsForLogin(LoginDto dto)
     {
         var user = _mapper.Map<User>(dto);
-        var userValidator = new LoginValidator();
+        var validator = new LoginValidator();
 
-        var validationResult = await userValidator.ValidateAsync(user);
+        var validationResult = await validator.ValidateAsync(user);
         if (!validationResult.IsValid)
         {
             _notificator.Handle(validationResult.Errors);
@@ -135,7 +135,7 @@ public class AuthService : IAuthService
         if (await _userRepository.UnitOfWork.Commit())
             return true;
 
-        _notificator.Handle("Ocorreu um erro ao salvar as alterações.");
+        _notificator.Handle("An error occurred while saving changes");
         return false;
     }
 }

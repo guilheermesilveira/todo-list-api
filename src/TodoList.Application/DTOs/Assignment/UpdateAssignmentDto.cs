@@ -2,7 +2,8 @@
 
 public class UpdateAssignmentDto
 {
-    public string? Description { get; set; }
+    public int Id { get; set; }
+    public string Description { get; set; } = null!;
     public DateTime? Deadline { get; set; }
     public int AssignmentListId { get; set; }
 }
